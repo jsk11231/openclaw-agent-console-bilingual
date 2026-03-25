@@ -2,6 +2,10 @@
 
 A sanitized, bilingual export of the OpenClaw agent console, architecture docs, and operating model.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/jsk11231/openclaw-agent-console-bilingual)](https://github.com/jsk11231/openclaw-agent-console-bilingual/commits/main)
+[![Repo size](https://img.shields.io/github/repo-size/jsk11231/openclaw-agent-console-bilingual)](https://github.com/jsk11231/openclaw-agent-console-bilingual)
+
 中文说明见下方。
 
 ## Highlights
@@ -19,6 +23,7 @@ A sanitized, bilingual export of the OpenClaw agent console, architecture docs, 
 ![Dashboard](docs/screenshots/dashboard.png)
 
 > Screenshot files will be added when running on a display-enabled Mac session.
+> If you want to add them later, place files at `docs/screenshots/dashboard.png` and `docs/screenshots/audit.png`.
 
 ### Audit Page
 

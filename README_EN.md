@@ -2,6 +2,11 @@
 
 A sanitized bilingual export of the OpenClaw agent console, architecture docs, and operating model.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/jsk11231/openclaw-agent-console-bilingual)](https://github.com/jsk11231/openclaw-agent-console-bilingual/commits/main)
+[![Repo size](https://img.shields.io/github/repo-size/jsk11231/openclaw-agent-console-bilingual)](https://github.com/jsk11231/openclaw-agent-console-bilingual)
+
+
 ## Highlights
 
 - Local single-service console for agent architecture management
