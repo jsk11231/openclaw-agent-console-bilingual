@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent Config Audit</title>
+  <style>
+    :root{--bg:#08101f;--panel:#11182e;--text:#e5e7eb;--muted:#94a3b8;--line:#24324e;--green:#22c55e;--yellow:#f59e0b;--red:#ef4444;--blue:#60a5fa}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(180deg,#08101f 0%, #0b1020 100%);color:var(--text)}
+    .wrap{max-width:1380px;margin:0 auto;padding:24px}.card{background:rgba(17,24,46,.92);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:16px}.top{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap}
+    h1,h2,h3{margin:0 0 12px}.muted{color:var(--muted)} .pill{display:inline-flex;align-items:center;gap:8px;background:#12203e;border:1px solid var(--line);padding:6px 10px;border-radius:999px;font-size:12px;color:#dbeafe;margin-right:8px}
+    .dot{width:10px;height:10px;border-radius:50%}.green{background:var(--green)}.yellow{background:var(--yellow)}.red{background:var(--red)}
+    table{width:100%;border-collapse:collapse}th,td{padding:11px 10px;border-bottom:1px solid #1f2d46;vertical-align:top}th{text-align:left;color:#cbd5e1;font-size:12px;background:rgba(15,23,42,.6)}td{font-size:13px}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.box{background:#0f172a;border:1px solid var(--line);border-radius:14px;padding:14px}.value{font-size:28px;font-weight:700}.label{font-size:12px;color:var(--muted);margin-bottom:8px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}button,a.btn{border:1px solid var(--line);background:#111b33;color:#dbeafe;border-radius:12px;padding:10px 12px;font-size:13px;text-decoration:none;cursor:pointer}.primary{background:linear-gradient(135deg,#2563eb,#22c55e);border:none;color:#fff}
+    .empty{padding:18px;border:1px dashed #2b3f63;border-radius:14px;color:var(--muted);text-align:center}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    @media (max-width:900px){.kpis{grid-template-columns:1fr 1fr}} @media (max-width:640px){.kpis{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top card">
+      <div>
+        <h1>配置审计页</h1>
+        <div class="muted">重复 skill / 重复职责 / 重复 workspace，一眼看出配置冲突。</div>
+      </div>
+      <div class="controls">
+        <a class="btn" href="/">返回控制台</a>
+        <button class="primary" id="refreshBtn">刷新审计</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="kpis" id="kpis"></div>
+    </div>
+
+    <div class="card">
+      <h2>重复 skill</h2>
+      <div id="skills"></div>
+    </div>
+
+    <div class="card">
+      <h2>重复职责</h2>
+      <div id="responsibilities"></div>
+    </div>
+
+    <div class="card">
+      <h2>重复 workspace</h2>
+      <div id="workspaces"></div>
+    </div>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    async function loadAudit(){
+      const res = await fetch('/api/audit');
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || '加载失败');
+      $('kpis').innerHTML = [
+        ['Agent 总数', data.summary.totalAgents],
+        ['重复 skill', data.summary.duplicateSkills],
+        ['重复职责', data.summary.duplicateResponsibilities],
+        ['重复 workspace', data.summary.duplicateWorkspaces],
+      ].map(([k,v])=>`<div class="box"><div class="label">${esc(k)}</div><div class="value">${esc(v)}</div></div>`).join('');
+      renderList('skills', data.duplicateSkills, 'skill');
+      renderList('responsibilities', data.duplicateResponsibilities, '职责描述');
+      renderList('workspaces', data.duplicateWorkspaces, 'workspace');
+    }
+    function renderList(id, items, title){
+      if(!items?.length){ $(id).innerHTML = '<div class="empty">没有发现重复项。</div>'; return; }
+      $(id).innerHTML = `<table><thead><tr><th>${esc(title)}</th><th>涉及 agent</th><th>数量</th></tr></thead><tbody>${items.map(x=>`<tr><td>${renderLabel(x.label, x.owners)}</td><td class="mono">${esc(x.owners.join(', '))}</td><td>${esc(x.owners.length)}</td></tr>`).join('')}</tbody></table>`;
+    }
+    function renderLabel(label, owners){
+      const first = owners?.[0];
+      if(!first) return esc(label);
+      return `<a href="/?edit=${encodeURIComponent(first)}" title="跳到首页编辑 ${esc(first)}">${esc(label)}</a>`;
+    }
+    $('refreshBtn').onclick = loadAudit;
+    loadAudit().catch(err => alert(err.message));
+  </script>
+</body>
+</html>

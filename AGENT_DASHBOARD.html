@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent Control Console</title>
+  <style>
+    :root{--bg:#0b1020;--panel:#11182e;--panel2:#0f172a;--text:#e5e7eb;--muted:#94a3b8;--line:#24324e;--green:#22c55e;--yellow:#f59e0b;--red:#ef4444;--blue:#60a5fa;--chip:#1f2a44;--nav:#0c152b}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(180deg,#08101f 0%, #0b1020 100%);color:var(--text)}
+    .wrap{max-width:1400px;margin:0 auto;padding:24px}
+    .topbar{position:sticky;top:0;z-index:50;background:rgba(12,21,43,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.22)}
+    .topbar-inner{max-width:1400px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand-badge{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#60a5fa,#22c55e);display:grid;place-items:center;font-weight:800;color:#04111e;box-shadow:0 8px 20px rgba(96,165,250,.25)}
+    .brand h1{margin:0;font-size:18px;letter-spacing:.3px}
+    .brand p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+    .nav{display:flex;flex-wrap:wrap;gap:8px}
+    .nav a{color:#dbeafe;text-decoration:none;font-size:13px;padding:8px 12px;border:1px solid var(--line);background:#111b33;border-radius:999px;transition:.18s}
+    .nav a:hover{transform:translateY(-1px);border-color:#35507f;background:#152240}
+    .header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin:0 0 22px}
+    .title h2{margin:0;font-size:30px;letter-spacing:.5px}
+    .title p{margin:6px 0 0;color:var(--muted)}
+    .badge{display:inline-flex;align-items:center;gap:8px;background:#13213d;border:1px solid var(--line);padding:10px 14px;border-radius:999px;color:#dbeafe;font-size:14px}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    .card{background:rgba(17,24,46,.92);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+    .card h2{margin:0 0 14px;font-size:18px}
+    .card h3{margin:18px 0 10px;font-size:15px;color:#dbeafe}
+    .muted{color:var(--muted)}
+    .kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+    .kpi .box{background:#0f172a;border:1px solid var(--line);border-radius:14px;padding:14px}
+    .kpi .label{font-size:12px;color:var(--muted);margin-bottom:8px}
+    .kpi .value{font-size:26px;font-weight:700}
+    .kpi .desc{font-size:12px;color:#cbd5e1;margin-top:6px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .pill{display:inline-flex;align-items:center;gap:8px;background:var(--chip);border:1px solid var(--line);padding:6px 10px;border-radius:999px;font-size:12px;color:#dbeafe}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .green{background:var(--green)} .yellow{background:var(--yellow)} .red{background:var(--red)}
+    table{width:100%;border-collapse:collapse;overflow:hidden}
+    th,td{padding:11px 10px;border-bottom:1px solid #1f2d46;vertical-align:top}
+    th{color:#cbd5e1;text-align:left;font-size:12px;font-weight:600;background:rgba(15,23,42,.6)}
+    td{font-size:13px;color:#e2e8f0}
+    tr:hover td{background:rgba(255,255,255,.02)}
+    .status{display:inline-flex;align-items:center;gap:8px}
+    .grid-6{grid-column:span 6} .grid-12{grid-column:span 12} .grid-8{grid-column:span 8} .grid-4{grid-column:span 4} .grid-7{grid-column:span 7} .grid-5{grid-column:span 5} .grid-3{grid-column:span 3} .grid-9{grid-column:span 9}
+    ul{margin:8px 0 0 18px;color:#e2e8f0} li{margin:6px 0}
+    .note{font-size:12px;color:var(--muted);line-height:1.6}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .tag{display:inline-block;background:#12203e;border:1px solid var(--line);padding:4px 8px;border-radius:999px;font-size:12px;margin:2px 6px 0 0;color:#dbeafe}
+    .score{font-weight:700}
+    .footer{margin:22px 0 6px;color:var(--muted);font-size:12px;text-align:center}
+    code{background:#0f172a;border:1px solid #24324e;border-radius:6px;padding:2px 6px;color:#dbeafe}
+    .anchor-offset{scroll-margin-top:96px}
+    @media (max-width:1100px){.kpi{grid-template-columns:repeat(3,1fr)}.grid-6,.grid-8,.grid-7,.grid-5,.grid-4,.grid-3,.grid-9{grid-column:span 12}.split{grid-template-columns:1fr}}
+    @media (max-width:700px){.header{flex-direction:column;align-items:flex-start}.kpi{grid-template-columns:1fr 1fr}.wrap,.topbar-inner{padding:14px}.title h2{font-size:24px}.nav{gap:6px}.nav a{font-size:12px;padding:7px 10px}}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-badge">A</div>
+        <div>
+          <h1>Agent Control Console</h1>
+          <p>后台控制台 · 状态灯 / 权重分 / 告警 / 技术面板</p>
+        </div>
+      </div>
+      <div class="nav">
+        <a href="#overview">总览</a>
+        <a href="#agents">Agent 状态</a>
+        <a href="#skills">技能分布</a>
+        <a href="#docs">文档一致性</a>
+        <a href="#alerts">告警与建议</a>
+        <a href="#summary">结论</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="header anchor-offset" id="overview">
+      <div class="title">
+        <h2>Agent Control Console</h2>
+        <p>更新时间：2026-03-25 · 数据源：<code>~/.openclaw/openclaw.json</code></p>
+      </div>
+      <div class="badge"><span class="dot green"></span> 状态灯 / 权重分 / 告警 / 控制台</div>
+    </div>
+
+    <div class="grid">
+      <section class="card grid-12 anchor-offset">
+        <div class="section-title">
+          <h2>1. 总览面板</h2>
+          <span class="pill"><span class="dot green"></span> 系统健康</span>
+        </div>
+        <div class="kpi">
+          <div class="box"><div class="label">Agent 总数</div><div class="value">15</div><div class="desc">架构已实体化</div></div>
+          <div class="box"><div class="label">正常</div><div class="value" style="color:var(--green)">13</div><div class="desc">大部分节点状态良好</div></div>
+          <div class="box"><div class="label">关注</div><div class="value" style="color:var(--yellow)">2</div><div class="desc">`xiaohongshu`、文档重复项</div></div>
+          <div class="box"><div class="label">风险</div><div class="value">0</div><div class="desc">当前无硬性冲突</div></div>
+          <div class="box"><div class="label">专职 skill 总数</div><div class="value">32</div><div class="desc">去重后归属清晰</div></div>
+          <div class="box"><div class="label">多头挂载 skill</div><div class="value" style="color:var(--green)">0</div><div class="desc">无重复挂载</div></div>
+        </div>
+
+        <h3>当前告警</h3>
+        <table>
+          <thead><tr><th style="width:120px">等级</th><th style="width:240px">项目</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><span class="status"><span class="dot yellow"></span>🟡</span></td><td>文档一致性</td><td>角色文件已基本统一，但仍需持续防止重复文件再出现</td></tr>
+            <tr><td><span class="status"><span class="dot yellow"></span>🟡</span></td><td>`xiaohongshu` 角色</td><td>已补角色文件，但需确认是否要纳入全局 AGENTS 侧主表长期展示</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card grid-12 anchor-offset" id="agents">
+        <div class="section-title">
+          <h2>2. Agent 状态灯</h2>
+          <span class="pill"><span class="dot green"></span> 全部在线</span>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Agent ID</th><th>中文名</th><th>状态</th><th>权重分</th><th>说明</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>dispatch</code></td><td>总调度中心</td><td>🟢</td><td class="score">10</td><td>入口/出口中枢</td></tr>
+            <tr><td><code>fast-response</code></td><td>快速响应中心</td><td>🟢</td><td class="score">8</td><td>轻任务与一步闭环</td></tr>
+            <tr><td><code>orchestration</code></td><td>协同编排中心</td><td>🟢</td><td class="score">8</td><td>复杂任务编排</td></tr>
+            <tr><td><code>information</code></td><td>信息支持中心</td><td>🟢</td><td class="score">7</td><td>检索与背景整理</td></tr>
+            <tr><td><code>analysis-center</code></td><td>分析研判中心</td><td>🟢</td><td class="score">9</td><td>研究研判与宏观分析</td></tr>
+            <tr><td><code>strategy-center</code></td><td>策略规划中心</td><td>🟢</td><td class="score">8</td><td>总框架与跨中心方案</td></tr>
+            <tr><td><code>shop-growth-officer</code></td><td>店铺增长官</td><td>🟢</td><td class="score">9</td><td>电商增长专职</td></tr>
+            <tr><td><code>trading-strategy-officer</code></td><td>交易策略官</td><td>🟢</td><td class="score">9</td><td>交易策略专职</td></tr>
+            <tr><td><code>admin-support</code></td><td>行政保障中心</td><td>🟢</td><td class="score">7</td><td>持续事务推进</td></tr>
+            <tr><td><code>tech-support</code></td><td>技术支持中心</td><td>🟢</td><td class="score">8</td><td>技术与技能建设</td></tr>
+            <tr><td><code>compliance</code></td><td>合规风控中心</td><td>🟢</td><td class="score">7</td><td>合规与边界审核</td></tr>
+            <tr><td><code>tourism-center</code></td><td>文旅项目中心</td><td>🟢</td><td class="score">7</td><td>出行与文旅专项</td></tr>
+            <tr><td><code>xiaohongshu</code></td><td>小红书</td><td>🟢</td><td class="score">7</td><td>小红书内容中心</td></tr>
+            <tr><td><code>evolution-center</code></td><td>系统进化中心</td><td>🟢</td><td class="score">8</td><td>复盘与系统优化</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card grid-6 anchor-offset" id="skills">
+        <div class="section-title">
+          <h2>3. 资源 / 技能分布</h2>
+          <span class="pill"><span class="dot green"></span> 技能去重完成</span>
+        </div>
+        <table>
+          <thead><tr><th>中心</th><th>专职 skill 数</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td><code>shop-growth-officer</code></td><td>9</td><td>电商增长全家桶</td></tr>
+            <tr><td><code>trading-strategy-officer</code></td><td>4</td><td>交易全家桶</td></tr>
+            <tr><td><code>analysis-center</code></td><td>7</td><td>研究研判 + 宏观数据</td></tr>
+            <tr><td><code>information</code></td><td>3</td><td>信息支持</td></tr>
+            <tr><td><code>tech-support</code></td><td>5</td><td>技能建设</td></tr>
+            <tr><td><code>evolution-center</code></td><td>4</td><td>系统进化</td></tr>
+            <tr><td><code>xiaohongshu</code></td><td>3</td><td>小红书内容中心</td></tr>
+          </tbody>
+        </table>
+        <h3>最高权重节点</h3>
+        <div>
+          <span class="tag">dispatch — 10</span>
+          <span class="tag">analysis-center — 9</span>
+          <span class="tag">shop-growth-officer — 9</span>
+          <span class="tag">trading-strategy-officer — 9</span>
+          <span class="tag">fast-response — 8</span>
+          <span class="tag">orchestration — 8</span>
+          <span class="tag">strategy-center — 8</span>
+          <span class="tag">tech-support — 8</span>
+          <span class="tag">evolution-center — 8</span>
+        </div>
+      </section>
+
+      <section class="card grid-6 anchor-offset" id="docs">
+        <div class="section-title">
+          <h2>4. 文档一致性</h2>
+          <span class="pill"><span class="dot green"></span> 已对齐</span>
+        </div>
+        <table>
+          <thead><tr><th>文件</th><th>状态</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><code>AGENTS.md</code></td><td>🟢</td><td>已补 `xiaohongshu`</td></tr>
+            <tr><td><code>AGENT_MAPPING.md</code></td><td>🟢</td><td>映射清晰</td></tr>
+            <tr><td><code>OPERATING_MODEL.md</code></td><td>🟢</td><td>运行口径一致</td></tr>
+            <tr><td><code>ROLE_analysis.md</code></td><td>🟢</td><td>存在</td></tr>
+            <tr><td><code>ROLE_strategy.md</code></td><td>🟢</td><td>存在</td></tr>
+            <tr><td><code>ROLE_shop-growth.md</code></td><td>🟢</td><td>存在</td></tr>
+            <tr><td><code>ROLE_trading-strategy.md</code></td><td>🟢</td><td>存在</td></tr>
+            <tr><td><code>ROLE_xiaohongshu.md</code></td><td>🟢</td><td>存在</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card grid-12 anchor-offset" id="alerts">
+        <div class="section-title">
+          <h2>5. 告警与建议</h2>
+          <span class="pill"><span class="dot yellow"></span> 轻关注</span>
+        </div>
+        <div class="split">
+          <div>
+            <h3>关注项</h3>
+            <ul>
+              <li>`xiaohongshu` 已补角色，但建议后续确认是否要在总调度主文档中长期保留其业务层级说明。</li>
+              <li>仪表盘目前是“运营 + 技术”合版，后续如果节点再增多，建议拆成两个子页：运营监控页、配置审计页。</li>
+            </ul>
+          </div>
+          <div>
+            <h3>维护建议</h3>
+            <ul>
+              <li>每次 skill 调整后，检查三件事：<code>openclaw.json</code>、<code>AGENTS.md</code>、<code>ROLE_*.md</code></li>
+              <li>新增 agent 时，先确认：是否需要进入总表，还是只保留在专属 workspace。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card grid-12 anchor-offset" id="summary">
+        <div class="section-title">
+          <h2>6. 一句话结论</h2>
+          <span class="pill"><span class="dot green"></span> 可用</span>
+        </div>
+        <p class="note" style="font-size:15px;color:#e2e8f0;line-height:1.8;margin:0;">
+          当前系统已经从“组织树”升级成了“可视化控制台”：<strong>状态灯、权重分、技能归属、文档一致性</strong>都能一眼看出来。
+        </p>
+      </section>
+    </div>
+
+    <div class="footer">Generated from current OpenClaw workspace state · AGENT_DASHBOARD.html</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,1044 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent Control Console</title>
+  <style>
+    :root{--bg:#08101f;--panel:#11182e;--panel2:#0f172a;--text:#e5e7eb;--muted:#94a3b8;--line:#24324e;--green:#22c55e;--yellow:#f59e0b;--red:#ef4444;--blue:#60a5fa;--chip:#1f2a44;--nav:#0c152b;--ok:#1b3b2a;--warn:#3b2e12;--bad:#3b1717}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(180deg,#08101f 0%, #0b1020 100%);color:var(--text)}
+    .topbar{position:sticky;top:0;z-index:50;background:rgba(12,21,43,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.22)}
+    .topbar-inner{max-width:1480px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand-badge{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#60a5fa,#22c55e);display:grid;place-items:center;font-weight:900;color:#04111e;box-shadow:0 8px 20px rgba(96,165,250,.25)}
+    .brand h1{margin:0;font-size:18px;letter-spacing:.3px}
+    .brand p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+    .nav{display:flex;flex-wrap:wrap;gap:8px}
+    .nav a{color:#dbeafe;text-decoration:none;font-size:13px;padding:8px 12px;border:1px solid var(--line);background:#111b33;border-radius:999px;transition:.18s}
+    .nav a:hover{transform:translateY(-1px);border-color:#35507f;background:#152240}
+    .wrap{max-width:1480px;margin:0 auto;padding:24px}
+    .header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin:0 0 22px}
+    .title h2{margin:0;font-size:30px;letter-spacing:.5px}
+    .title p{margin:6px 0 0;color:var(--muted)}
+    .badge{display:inline-flex;align-items:center;gap:8px;background:#13213d;border:1px solid var(--line);padding:10px 14px;border-radius:999px;color:#dbeafe;font-size:14px}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    .card{background:rgba(17,24,46,.92);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+    .card h2{margin:0 0 14px;font-size:18px}
+    .card h3{margin:18px 0 10px;font-size:15px;color:#dbeafe}
+    .muted{color:var(--muted)}
+    .kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+    .kpi .box{background:#0f172a;border:1px solid var(--line);border-radius:14px;padding:14px}
+    .kpi .label{font-size:12px;color:var(--muted);margin-bottom:8px}
+    .kpi .value{font-size:26px;font-weight:700}
+    .kpi .desc{font-size:12px;color:#cbd5e1;margin-top:6px;line-height:1.45}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+    .pill{display:inline-flex;align-items:center;gap:8px;background:var(--chip);border:1px solid var(--line);padding:6px 10px;border-radius:999px;font-size:12px;color:#dbeafe}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .green{background:var(--green)} .yellow{background:var(--yellow)} .red{background:var(--red)}
+    table{width:100%;border-collapse:collapse;overflow:hidden}
+    th,td{padding:11px 10px;border-bottom:1px solid #1f2d46;vertical-align:top}
+    th{color:#cbd5e1;text-align:left;font-size:12px;font-weight:600;background:rgba(15,23,42,.6)}
+    td{font-size:13px;color:#e2e8f0}
+    tr:hover td{background:rgba(255,255,255,.02)}
+    .status{display:inline-flex;align-items:center;gap:8px}
+    .grid-6{grid-column:span 6} .grid-12{grid-column:span 12} .grid-8{grid-column:span 8} .grid-4{grid-column:span 4} .grid-7{grid-column:span 7} .grid-5{grid-column:span 5} .grid-3{grid-column:span 3} .grid-9{grid-column:span 9}
+    ul{margin:8px 0 0 18px;color:#e2e8f0} li{margin:6px 0}
+    .note{font-size:12px;color:var(--muted);line-height:1.6}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .tag{display:inline-block;background:#12203e;border:1px solid var(--line);padding:4px 8px;border-radius:999px;font-size:12px;margin:2px 6px 0 0;color:#dbeafe}
+    .score{font-weight:700}
+    .footer{margin:22px 0 6px;color:var(--muted);font-size:12px;text-align:center}
+    code{background:#0f172a;border:1px solid #24324e;border-radius:6px;padding:2px 6px;color:#dbeafe}
+    .anchor-offset{scroll-margin-top:96px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    button,.btn{border:1px solid var(--line);background:#111b33;color:#dbeafe;border-radius:12px;padding:10px 12px;font-size:13px;cursor:pointer;transition:.16s}
+    button:hover,.btn:hover{transform:translateY(-1px);border-color:#35507f;background:#152240}
+    button.primary{background:linear-gradient(135deg,#2563eb,#22c55e);border:none;color:white}
+    button.danger{background:linear-gradient(135deg,#991b1b,#ef4444);border:none;color:white}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+    .field{display:flex;flex-direction:column;gap:6px;flex:1;min-width:160px}
+    .field input,.field textarea, .field select{width:100%;background:#0f172a;color:#e5e7eb;border:1px solid #24324e;border-radius:12px;padding:10px 12px;font:inherit;outline:none}
+    .field textarea{min-height:84px;resize:vertical}
+    .field label{font-size:12px;color:var(--muted)}
+    .mini{font-size:12px;color:var(--muted)}
+    .badge-row{display:flex;gap:8px;flex-wrap:wrap}
+    .status-ok{background:var(--ok)}
+    .status-warn{background:var(--warn)}
+    .status-bad{background:var(--bad)}
+    .hidden{display:none !important}
+    .modal{position:fixed;inset:0;background:rgba(2,6,23,.72);display:none;align-items:center;justify-content:center;padding:18px;z-index:80}
+    .modal.open{display:flex}
+    .modal-card{width:min(920px,100%);max-height:90vh;overflow:auto;background:#0c1327;border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .form-grid .full{grid-column:1/-1}
+    .empty{padding:20px;border:1px dashed #2b3f63;border-radius:14px;color:var(--muted);text-align:center}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+    .arch-wrap{position:relative;height:640px;overflow:auto;background:#0b1222;border:1px solid var(--line);border-radius:16px}
+    .arch-viewport{position:relative;width:1600px;height:900px;transform-origin:0 0}
+    .arch-canvas{position:relative;width:1600px;height:900px}
+    .arch-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+    .zoom-hud{position:absolute;right:12px;top:12px;display:flex;gap:8px;z-index:20}
+    .agent-node{position:absolute;min-width:170px;max-width:220px;padding:12px 14px 12px 34px;background:#12203e;border:1px solid #35507f;border-radius:16px;box-shadow:0 8px 20px rgba(0,0,0,.25);cursor:grab;user-select:none}
+    .agent-node:active{cursor:grabbing}
+    .agent-node .title{font-weight:700;font-size:13px;margin-bottom:4px}.agent-node .sub{font-size:12px;color:var(--muted)}
+        .arch-actions{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+    @media (max-width:1100px){.kpi{grid-template-columns:repeat(3,1fr)}.grid-6,.grid-8,.grid-7,.grid-5,.grid-4,.grid-3,.grid-9{grid-column:span 12}.split{grid-template-columns:1fr}}
+    @media (max-width:700px){.header{flex-direction:column;align-items:flex-start}.kpi{grid-template-columns:1fr 1fr}.wrap,.topbar-inner{padding:14px}.title h2{font-size:24px}.nav{gap:6px}.nav a{font-size:12px;padding:7px 10px}.form-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-badge">A</div>
+        <div>
+          <h1>Agent Control Console</h1>
+          <p>本地控制台 · 实时刷新 / 状态灯 / 技能编辑 / LAN 访问</p>
+        </div>
+      </div>
+      <div class="nav">
+        <a href="#overview">总览</a>
+        <a href="#architecture">架构图</a>
+        <a href="#agents">Agent 状态</a>
+        <a href="#skills">技能分布</a>
+        <a href="#docs">文档一致性</a>
+        <a href="#alerts">告警与建议</a>
+        <a href="#summary">结论</a>
+        <a href="/audit">配置审计</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="header anchor-offset" id="overview">
+      <div class="title">
+        <h2>Agent Control Console</h2>
+        <p id="metaLine">加载中…</p>
+      </div>
+      <div class="controls">
+        <button class="primary" id="btnRefresh">立即刷新</button>
+        <button id="btnOpenNew">新增 Agent</button>
+        <button id="btnExport">导出 JSON</button>
+        <a class="btn" href="/audit">配置审计页</a>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="field" style="max-width:240px;flex:0 0 240px">
+        <label>搜索 Agent</label>
+        <input id="searchInput" placeholder="输入 id / 名称 / skill 关键词" />
+      </div>
+      <div class="field" style="max-width:180px;flex:0 0 180px">
+        <label>自动刷新</label>
+        <select id="autoRefreshSel">
+          <option value="0">关闭</option>
+          <option value="3000">3 秒</option>
+          <option value="5000" selected>5 秒</option>
+          <option value="10000">10 秒</option>
+        </select>
+      </div>
+      <div class="field" style="max-width:220px;flex:0 0 220px">
+        <label>服务状态</label>
+        <div class="badge-row">
+          <span class="pill"><span class="dot green"></span><span id="serviceOk">API 未连接</span></span>
+        </div>
+      </div>
+      <div class="field" style="min-width:280px;flex:1 1 320px">
+        <label>默认 API 模型</label>
+        <div class="controls">
+          <select id="modelPrimarySel" style="flex:1;min-width:220px"></select>
+          <button id="saveModelBtn">保存模型</button>
+        </div>
+        <div class="mini" id="modelInfo">加载中…</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="card grid-12 anchor-offset">
+        <div class="section-title">
+          <h2>1. 总览面板</h2>
+          <span class="pill"><span class="dot green"></span> <span id="healthTag">系统健康</span></span>
+        </div>
+        <div class="kpi" id="kpiWrap"></div>
+
+        <h3>当前告警</h3>
+        <table>
+          <thead><tr><th style="width:120px">等级</th><th style="width:240px">项目</th><th>说明</th></tr></thead>
+          <tbody id="alertsBody"></tbody>
+        </table>
+      </section>
+
+      <section class="card grid-12 anchor-offset" id="architecture">
+        <div class="section-title">
+          <h2>0. Agent 架构图</h2>
+          <span class="pill"><span class="dot green"></span> 可拖拽调整</span>
+        </div>
+        <div class="arch-wrap" id="archWrap">
+          <div class="zoom-hud"><span class="pill"><span class="dot green"></span><span id="zoomInfo">100%</span></span></div>
+          <div class="arch-viewport" id="archViewport">
+            <div class="arch-canvas" id="archCanvas">
+              <svg class="arch-svg" id="archSvg"></svg>
+              <div id="archNodes"></div>
+            </div>
+          </div>
+        </div>
+        <div class="arch-actions">
+          <button id="saveLayoutBtn">保存布局</button>
+          <button id="autoLayoutBtn">自动排布</button>
+          <button id="layoutDirBtn">横向/纵向</button>
+          <button id="resetLayoutBtn">恢复默认</button>
+          <button id="normalizeLayoutBtn">规范布局</button>
+          <button id="zoomOutBtn">−</button>
+          <button id="zoomResetBtn">100%</button>
+          <button id="zoomInBtn">+</button>
+          <button id="fitBtn">重算边界</button>
+          <button id="toggleConnectBtn">拖线改关系</button>
+          <span class="mini" id="layoutInfo">拖曳 agent 卡片后点保存。拖线模式下按住起点拖到目标节点即可连线；节点拖动会自动吸附网格。</span>
+        </div>
+      </section>
+
+      <section class="card grid-12 anchor-offset" id="agents">
+        <div class="section-title">
+          <h2>2. Agent 状态灯</h2>
+          <span class="pill"><span class="dot green"></span> <span id="agentCountTag">加载中</span></span>
+        </div>
+        <div id="agentsTableWrap"></div>
+      </section>
+
+      <section class="card grid-6 anchor-offset" id="skills">
+        <div class="section-title">
+          <h2>3. 资源 / 技能分布</h2>
+          <span class="pill"><span class="dot green"></span> 技能去重完成</span>
+        </div>
+        <div id="skillsTableWrap"></div>
+        <h3>最高权重节点</h3>
+        <div id="topWeights"></div>
+      </section>
+
+      <section class="card grid-6 anchor-offset" id="docs">
+        <div class="section-title">
+          <h2>4. 文档一致性</h2>
+          <span class="pill"><span class="dot green"></span> 已对齐</span>
+        </div>
+        <div id="docsWrap"></div>
+      </section>
+
+      <section class="card grid-12 anchor-offset" id="alerts">
+        <div class="section-title">
+          <h2>5. 告警与建议</h2>
+          <span class="pill"><span class="dot yellow"></span> 轻关注</span>
+        </div>
+        <div class="split">
+          <div>
+            <h3>关注项</h3>
+            <div id="focusList"></div>
+          </div>
+          <div>
+            <h3>维护建议</h3>
+            <div id="suggestList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card grid-12 anchor-offset" id="summary">
+        <div class="section-title">
+          <h2>6. 一句话结论</h2>
+          <span class="pill"><span class="dot green"></span> 可用</span>
+        </div>
+        <p class="note" id="summaryText" style="font-size:15px;color:#e2e8f0;line-height:1.8;margin:0;">加载中…</p>
+      </section>
+    </div>
+
+    <div class="footer">Local console · <span id="footerTime">-</span></div>
+  </div>
+
+  <div class="modal" id="agentModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h2 style="margin:0">新增 Agent</h2>
+          <div class="mini">会写入 <span class="mono">~/.openclaw/openclaw.json</span>，自动备份。</div>
+        </div>
+        <button id="closeModal">关闭</button>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label>ID *</label><input id="newId" placeholder="new-agent" /></div>
+        <div class="field"><label>名称 *</label><input id="newName" placeholder="新节点" /></div>
+        <div class="field"><label>工作区</label><input id="newWorkspace" placeholder="[workspace-agent]" /></div>
+        <div class="field"><label>Emoji</label><input id="newEmoji" placeholder="🤖" /></div>
+        <div class="field full"><label>技能（逗号/换行分隔）</label><textarea id="newSkills" placeholder="skill-a, skill-b"></textarea></div>
+        <div class="field full"><label>身份主题</label><textarea id="newTheme" placeholder="描述这个 agent 的职责与风格"></textarea></div>
+        <div class="field"><label>允许调度的 subagents</label><input id="newAllowAgents" placeholder="dispatch, information" /></div>
+        <div class="field"><label>额外允许工具</label><input id="newTools" placeholder="browser, feishu_im_user_message" /></div>
+      </div>
+      <div class="controls" style="margin-top:14px;justify-content:flex-end">
+        <button id="cancelCreate">取消</button>
+        <button class="primary" id="createAgentBtn">创建</button>
+      </div>
+      <div id="newAgentMsg" class="mini" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="editModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h2 style="margin:0">编辑 Agent</h2>
+          <div class="mini" id="editSubtitle">-</div>
+        </div>
+        <button id="closeEditModal">关闭</button>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label>ID</label><input id="editId" disabled /></div>
+        <div class="field"><label>名称</label><input id="editName" /></div>
+        <div class="field"><label>工作区</label><input id="editWorkspace" /></div>
+        <div class="field"><label>状态</label><select id="editStatus"><option value="online">online</option><option value="attention">attention</option><option value="risk">risk</option><option value="disabled">disabled</option></select></div>
+        <div class="field"><label>Emoji</label><input id="editEmoji" /></div>
+        <div class="field"><label>身份名</label><input id="editIdentityName" /></div>
+        <div class="field full"><label>技能</label><textarea id="editSkills"></textarea></div>
+        <div class="field full"><label>身份主题</label><textarea id="editTheme"></textarea></div>
+        <div class="field full"><label>允许 subagents</label><textarea id="editAllowAgents"></textarea></div>
+        <div class="field full"><label>额外允许工具</label><textarea id="editTools"></textarea></div>
+      </div>
+      <div class="controls" style="margin-top:14px;justify-content:space-between;flex-wrap:wrap">
+        <button class="danger" id="deleteAgentBtn">删除</button>
+        <div class="controls">
+          <button id="editSkillsBtn">只保存技能</button>
+          <button class="primary" id="saveAgentBtn">保存全部</button>
+        </div>
+      </div>
+      <div id="editMsg" class="mini" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <script>
+    const state = { data: null, timer: null, filter: '', editing: null, models: null, drag: null, connectFrom: null, connectPreview: null, connectMode: false, didDrag: false, layoutSaving: false, zoom: 1, zoomX: 0, zoomY: 0, fitTimer: null, zoomTimer: null, autoFit: false };
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    const badgeClass = (status) => status === 'risk' ? 'status-bad' : status === 'attention' ? 'status-warn' : 'status-ok';
+
+    function topWeights(agents) {
+      const values = [...agents].sort((a,b) => (b.skillCount || 0) - (a.skillCount || 0) || a.id.localeCompare(b.id));
+      return values.slice(0, 9).map(a => `<span class="tag">${esc(a.id)} — ${a.skillCount}</span>`).join('');
+    }
+
+    function renderKpis(data) {
+      const c = data.counts || {};
+      const boxes = [
+        ['Agent 总数', c.total ?? 0, '架构已实体化'],
+        ['正常', c.online ?? 0, '大部分节点状态良好', 'var(--green)'],
+        ['关注', c.attention ?? 0, '需要留意的节点', 'var(--yellow)'],
+        ['风险', c.risk ?? 0, '当前需处理的节点', 'var(--red)'],
+        ['专职 skill 总数', c.skills ?? 0, '去重后汇总'],
+        ['多头挂载 skill', data.duplicates?.length ?? 0, '重复归属项'],
+      ];
+      return boxes.map(([label, value, desc, color]) => `
+        <div class="box">
+          <div class="label">${esc(label)}</div>
+          <div class="value"${color ? ` style="color:${color}"` : ''}>${esc(value)}</div>
+          <div class="desc">${esc(desc)}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderAlerts(data) {
+      const duplicateNote = data.duplicates?.length
+        ? `发现 ${data.duplicates.length} 个重复 skill：${data.duplicates.slice(0,5).map(x => `${x.skill} → ${x.owners.join(' / ')}`).join('；')}`
+        : '无重复 skill 挂载。';
+      return [
+        ['🟡', '文档一致性', '角色文件已基本统一，但仍需持续防止重复文件再出现'],
+        ['🟡', '`xiaohongshu` 角色', '已补角色文件，但需确认是否要纳入全局 AGENTS 侧主表长期展示'],
+        data.duplicates?.length ? ['🟡', 'skill 冲突', duplicateNote] : null,
+      ].filter(Boolean).map(([lvl, item, desc]) => `
+        <tr>
+          <td><span class="status"><span class="dot yellow"></span>${lvl}</span></td>
+          <td>${esc(item)}</td>
+          <td>${esc(desc)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderAgents(data) {
+      const agents = (data.agents || []).filter(a => {
+        const q = state.filter.trim().toLowerCase();
+        if (!q) return true;
+        const hay = [a.id, a.name, a.workspace, a.skills?.join(' '), a.theme].join(' ').toLowerCase();
+        return hay.includes(q);
+      });
+      if (!agents.length) return '<div class="empty">没有匹配的 agent。</div>';
+      return `
+        <table>
+          <thead><tr><th>Agent ID</th><th>中文名</th><th>状态</th><th>权重分</th><th>技能 / 说明</th><th>操作</th></tr></thead>
+          <tbody>
+            ${agents.map(a => `
+              <tr>
+                <td><code>${esc(a.id)}</code></td>
+                <td>${esc(a.name || a.id)} ${a.emoji ? esc(a.emoji) : ''}</td>
+                <td><span class="pill ${badgeClass(a.status)}"><span class="dot ${a.status === 'risk' ? 'red' : a.status === 'attention' ? 'yellow' : 'green'}"></span>${esc(a.status)}</span></td>
+                <td class="score">${esc(a.skillCount || 0)}</td>
+                <td>
+                  <div>${esc((a.skills || []).join(' / ') || '—')}</div>
+                  <div class="mini">${esc(a.theme || '')}</div>
+                </td>
+                <td>
+                  <div class="controls">
+                    <button data-edit="${esc(a.id)}">编辑</button>
+                    <button data-skills="${esc(a.id)}">改技能</button>
+                  </div>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>`;
+    }
+
+    function renderSkills(data) {
+      const rows = (data.agents || []).map(a => `<tr><td><code>${esc(a.id)}</code></td><td>${esc(a.skillCount || 0)}</td><td>${esc(a.workspace || '')}</td></tr>`).join('');
+      return `<table><thead><tr><th>中心</th><th>专职 skill 数</th><th>工作区</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    function renderDocs() {
+      const rows = [
+        ['AGENTS.md', '🟢', '已补 `xiaohongshu`'],
+        ['AGENT_MAPPING.md', '🟢', '映射清晰'],
+        ['OPERATING_MODEL.md', '🟢', '运行口径一致'],
+        ['ROLE_analysis.md', '🟢', '存在'],
+        ['ROLE_strategy.md', '🟢', '存在'],
+        ['ROLE_shop-growth.md', '🟢', '存在'],
+        ['ROLE_trading-strategy.md', '🟢', '存在'],
+        ['ROLE_xiaohongshu.md', '🟢', '存在'],
+      ];
+      return `<table><thead><tr><th>文件</th><th>状态</th><th>说明</th></tr></thead><tbody>${rows.map(r => `<tr><td><code>${esc(r[0])}</code></td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join('')}</tbody></table>`;
+    }
+
+    function renderFocus() {
+      return `<ul><li><code>xiaohongshu</code> 已补角色，但建议后续确认是否要在总调度主文档中长期保留其业务层级说明。</li><li>仪表盘目前是“运营 + 技术”合版，后续如果节点再增多，建议拆成两个子页：运营监控页、配置审计页。</li></ul>`;
+    }
+
+    function renderSuggestions() {
+      return `<ul><li>每次 skill 调整后，检查三件事：<code>openclaw.json</code>、<code>AGENTS.md</code>、<code>ROLE_*.md</code></li><li>新增 agent 时，先确认：是否需要进入总表，还是只保留在专属 workspace。</li></ul>`;
+    }
+
+    function renderSummary(data) {
+      const c = data.counts || {};
+      const duplicateText = (data.duplicates?.length || 0) ? `，当前有 ${data.duplicates.length} 个重复 skill 需要留意` : '，技能挂载干净';
+      return `当前系统已经从“组织树”升级成了“可视化控制台”：<strong>状态灯、权重分、技能归属、文档一致性</strong>都能一眼看出来。当前共有 <strong>${esc(c.total || 0)}</strong> 个 agent、<strong>${esc(c.online || 0)}</strong> 个正常${duplicateText}。`;
+    }
+
+    function rootIds(data) {
+      const ids = (data.agents || []).map(a => a.id);
+      const presentAnchors = anchors.filter(id => ids.includes(id));
+      if (presentAnchors.length) return presentAnchors;
+      const targets = new Set((data.edges || []).map(x => x[1]));
+      const roots = ids.filter(id => !targets.has(id));
+      return roots.length ? roots : ids.slice(0, 1);
+    }
+
+    function childrenMap(data) {
+      const map = new Map();
+      (data.edges || []).forEach(([from, to]) => {
+        if (!map.has(from)) map.set(from, []);
+        map.get(from).push(to);
+      });
+      return map;
+    }
+
+    function depthMap(data) {
+      const map = new Map();
+      const kids = childrenMap(data);
+      const roots = rootIds(data);
+      const walk = (id, depth) => {
+        if (map.has(id) && map.get(id) <= depth) return;
+        map.set(id, depth);
+        (kids.get(id) || []).forEach(child => walk(child, depth + 1));
+      };
+      roots.forEach(id => walk(id, 0));
+      (data.agents || []).forEach(a => { if (!map.has(a.id)) map.set(a.id, 0); });
+      return map;
+    }
+
+    function childrenMap(data) {
+      const map = new Map();
+      (data.edges || []).forEach(([from, to]) => {
+        if (!map.has(from)) map.set(from, []);
+        map.get(from).push(to);
+      });
+      return map;
+    }
+
+    function rootIds(data) {
+      const ids = (data.agents || []).map(a => a.id);
+      const presentAnchors = anchors.filter(id => ids.includes(id));
+      if (presentAnchors.length) return presentAnchors;
+      const targets = new Set((data.edges || []).map(x => x[1]));
+      const roots = ids.filter(id => !targets.has(id));
+      return roots.length ? roots : ids.slice(0, 1);
+    }
+
+    function visibleNodes(data) {
+      const kids = childrenMap(data);
+      const out = [];
+      const seen = new Set();
+      const walk = (id, depth) => {
+        if (seen.has(id)) return;
+        const a = (data.agents || []).find(x => x.id === id);
+        if (!a) return;
+        seen.add(id);
+        out.push({ ...a, depth });
+        (kids.get(id) || []).forEach(child => walk(child, depth + 1));
+      };
+      rootIds(data).forEach(id => walk(id, 0));
+      return out;
+    }
+
+
+    function snap(v, grid = 24) {
+      return Math.round(v / grid) * grid;
+    }
+
+    function nodeCenter(node) {
+      return {
+        x: node.offsetLeft + node.offsetWidth / 2,
+        y: node.offsetTop + node.offsetHeight / 2,
+      };
+    }
+
+    function applyZoom() {
+      const viewport = $('archViewport');
+      if (!viewport) return;
+      viewport.style.transform = `translate(${state.zoomX}px, ${state.zoomY}px) scale(${state.zoom})`;
+      viewport.style.transformOrigin = '0 0';
+      $('zoomInfo').textContent = `${Math.round(state.zoom * 100)}%`;
+    }
+
+    function canvasBounds(data) {
+      const layout = data?.layout || {};
+      const nodes = visibleNodes(data || state.data || {agents: []});
+      const xs = [];
+      const ys = [];
+      for (const n of nodes) {
+        const pos = layout[n.id] || { x: 40, y: 40 };
+        xs.push(pos.x, pos.x + 220);
+        ys.push(pos.y, pos.y + 90);
+      }
+      const minX = xs.length ? Math.min(...xs) : 0;
+      const minY = ys.length ? Math.min(...ys) : 0;
+      const maxX = xs.length ? Math.max(...xs) : 800;
+      const maxY = ys.length ? Math.max(...ys) : 600;
+      const pad = 120;
+      return {
+        width: Math.max(1200, maxX - minX + pad * 2),
+        height: Math.max(800, maxY - minY + pad * 2),
+        minX,
+        minY,
+        maxX,
+        maxY,
+      };
+    }
+
+    function applyCanvasBounds(data) {
+      const canvas = $('archCanvas');
+      const viewport = $('archViewport');
+      const wrap = $('archWrap');
+      const b = canvasBounds(data);
+      canvas.style.width = `${b.width}px`;
+      canvas.style.height = `${b.height}px`;
+      viewport.style.width = `${b.width}px`;
+      viewport.style.height = `${b.height}px`;
+      wrap.style.minHeight = '640px';
+      if (data) {
+        const pad = 120;
+        canvas.dataset.offsetX = String(-b.minX + pad);
+        canvas.dataset.offsetY = String(-b.minY + pad);
+      }
+    }
+
+    function setZoom(nextZoom, centerX = 0, centerY = 0) {
+      const clamped = Math.min(2.5, Math.max(0.45, nextZoom));
+      const ratio = clamped / state.zoom;
+      state.zoomX = (state.zoomX - centerX) * ratio + centerX;
+      state.zoomY = (state.zoomY - centerY) * ratio + centerY;
+      state.zoom = clamped;
+      state.autoFit = false;
+      applyZoom();
+      if (state.data) drawEdges(state.data);
+    }
+
+    function renderArchitecture(data) {
+      applyCanvasBounds(data);
+      const layout = data.layout || {};
+      const collapsed = data.collapsed || {};
+      const nodesWrap = $('archNodes');
+      nodesWrap.innerHTML = '';
+      const visible = visibleNodes(data);
+      visible.forEach(a => {
+        const pos = layout[a.id] || {x: 40, y: 40};
+        const offX = Number($('archCanvas')?.dataset.offsetX || 0);
+        const offY = Number($('archCanvas')?.dataset.offsetY || 0);
+        const node = document.createElement('div');
+        node.className = 'agent-node';
+        node.dataset.node = a.id;
+        node.style.left = snap(pos.x + offX) + 'px';
+        node.style.top = snap(pos.y + offY) + 'px';
+        node.innerHTML = `<div class="title">${esc(a.name || a.id)}</div><div class="sub">${esc(a.id)} · ${esc(a.depth ?? 0)} 层</div>`;
+        nodesWrap.appendChild(node);
+      });
+      applyZoom();
+      requestAnimationFrame(() => { drawEdges(data); });
+      bindArchEvents(data);
+    }
+
+    function drawEdges(data) {
+      const svg = $('archSvg');
+      const nodes = Object.fromEntries([...document.querySelectorAll('.agent-node')].map(el => [el.dataset.node, el]));
+      const edges = data.edges || [];
+      const isHidden = new Set();
+      const kids = childrenMap(data);
+      const collapsed = data.collapsed || {};
+      const markHidden = (id) => { (kids.get(id) || []).forEach(child => { isHidden.add(child); markHidden(child); }); };
+      Object.keys(collapsed).filter(k => collapsed[k]).forEach(markHidden);
+      const lines = edges.map(([from, to]) => {
+        const a = nodes[from], b = nodes[to];
+        if (!a || !b || isHidden.has(from) || isHidden.has(to)) return '';
+        const ac = nodeCenter(a);
+        const bc = nodeCenter(b);
+        return `<line x1="${ac.x}" y1="${ac.y}" x2="${bc.x}" y2="${bc.y}" stroke="#40639a" stroke-width="2.5" opacity="0.8" marker-end="url(#arrow)" />`;
+      }).join('');
+
+      const preview = (() => {
+        if (!state.connectMode || !state.connectFrom || !state.connectPreview) return '';
+        const source = nodes[state.connectFrom];
+        if (!source) return '';
+        const sc = nodeCenter(source);
+        const pc = state.connectPreview;
+        return `<line x1="${sc.x}" y1="${sc.y}" x2="${pc.x}" y2="${pc.y}" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="8 6" opacity="0.9" />`;
+      })();
+
+      svg.innerHTML = `${lines}${preview}<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#40639a" /></marker></defs>`;
+    }
+
+    function bindArchEvents(data) {
+      document.querySelectorAll('.agent-node').forEach(node => {
+        node.onmousedown = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (state.connectMode) {
+            state.connectFrom = node.dataset.node;
+            state.connectPreview = nodeCenter(node);
+            state.didDrag = false;
+            $('layoutInfo').textContent = `连线起点：${state.connectFrom}，拖到目标节点后松开。`;
+            drawEdges(data);
+            return;
+          }
+          state.didDrag = false;
+          state.drag = { id: node.dataset.node, startX: e.clientX, startY: e.clientY, left: node.offsetLeft, top: node.offsetTop };
+          document.body.style.userSelect = 'none';
+        };
+        node.ondblclick = () => openEdit(node.dataset.node);
+        node.onmouseup = async (e) => {
+          if (!state.connectMode || !state.connectFrom) return;
+          e.preventDefault();
+          e.stopPropagation();
+          if (node.dataset.node !== state.connectFrom) {
+            await applyEdgeChange(state.connectFrom, node.dataset.node, data);
+          }
+          state.connectFrom = null;
+          state.connectPreview = null;
+          drawEdges(data);
+        };
+        node.onclick = async (e) => {
+          if (state.didDrag) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        };
+      });
+
+      const canvas = $('archCanvas');
+      const wrap = $('archWrap');
+      canvas.onmousemove = (e) => {
+        if (state.connectMode && state.connectFrom) {
+          const rect = canvas.getBoundingClientRect();
+          state.connectPreview = { x: e.clientX - rect.left + canvas.scrollLeft, y: e.clientY - rect.top + canvas.scrollTop };
+          drawEdges(data);
+        }
+      };
+      wrap.onwheel = (e) => {
+        if (!e.ctrlKey && !e.metaKey) return;
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.08 : 0.08;
+        setZoom(state.zoom + delta, e.offsetX, e.offsetY);
+        clearTimeout(state.zoomTimer);
+        state.zoomTimer = setTimeout(() => saveLayoutSnapshot(state.data, '缩放已保存'), 300);
+      };
+
+      document.onmousemove = (e) => {
+        if (state.drag) {
+          const node = document.querySelector(`[data-node="${state.drag.id}"]`);
+          if (!node) return;
+          state.didDrag = true;
+          const left = snap(Math.max(0, state.drag.left + (e.clientX - state.drag.startX)));
+          const top = snap(Math.max(0, state.drag.top + (e.clientY - state.drag.startY)));
+          node.style.left = left + 'px';
+          node.style.top = top + 'px';
+          drawEdges(data);
+          return;
+        }
+        if (state.connectMode && state.connectFrom && state.connectPreview) {
+          drawEdges(data);
+        }
+      };
+      document.onmouseup = async () => {
+        const didMove = !!state.drag;
+        if (state.drag) {
+          state.drag = null;
+          document.body.style.userSelect = '';
+        }
+        if (didMove) {
+          await saveLayoutSnapshot(data, '布局已自动保存');
+        }
+        if (state.connectMode) {
+          state.connectPreview = null;
+          if (!state.connectFrom) drawEdges(data);
+        }
+        setTimeout(() => { state.didDrag = false; }, 0);
+      };
+    }
+
+    function collectLayout() {
+      const layout = {};
+      document.querySelectorAll('.agent-node').forEach(node => {
+        layout[node.dataset.node] = { x: snap(node.offsetLeft), y: snap(node.offsetTop) };
+      });
+      return layout;
+    }
+
+    async function saveLayoutSnapshot(data, reason='布局已保存') {
+      if (state.layoutSaving) return;
+      state.layoutSaving = true;
+      try {
+        await api('/api/layout', 'PUT', { layout: collectLayout(), edges: data?.edges || state.data?.edges, collapsed: data?.collapsed || state.data?.collapsed || {}, zoom: state.zoom, zoomX: state.zoomX, zoomY: state.zoomY });
+        $('layoutInfo').textContent = reason;
+      } catch (err) {
+        $('layoutInfo').textContent = `布局保存失败：${err.message}`;
+      } finally {
+        state.layoutSaving = false;
+      }
+    }
+
+    function scheduleBoundsSave() {
+      clearTimeout(state.fitTimer);
+      state.fitTimer = setTimeout(() => saveLayoutSnapshot(state.data, '画布边界已更新'), 120);
+    }
+
+    function autoLayout(data) {
+      const kids = childrenMap(data);
+      const layout = {};
+      const horizontal = $('layoutDirBtn').dataset.dir !== 'vertical';
+      const gapMain = 280;
+      const gapCross = 120;
+      const levels = new Map();
+      const visited = new Set();
+      const assign = (id, depth) => {
+        if (visited.has(id)) return;
+        visited.add(id);
+        if (!levels.has(depth)) levels.set(depth, []);
+        levels.get(depth).push(id);
+        (kids.get(id) || []).forEach(child => assign(child, depth + 1));
+      };
+      rootIds(data).forEach(id => assign(id, 0));
+      (data.agents || []).forEach(a => { if (!visited.has(a.id)) assign(a.id, 0); });
+      [...levels.entries()].forEach(([depth, ids]) => {
+        ids.forEach((id, idx) => {
+          layout[id] = horizontal
+            ? { x: snap(120 + depth * gapMain), y: snap(60 + idx * gapCross) }
+            : { x: snap(120 + idx * gapCross), y: snap(60 + depth * gapMain) };
+        });
+      });
+      return layout;
+    }
+
+    async function applyEdgeChange(from, to, data) {
+      const edges = (data.edges || []).filter(([a, b]) => b !== to);
+      edges.push([from, to]);
+      await api('/api/layout', 'PUT', { layout: collectLayout(), edges, collapsed: data.collapsed || {}, allowEmptyEdges: false });
+      $('layoutInfo').textContent = `已将 ${to} 挂到 ${from} 下。`;
+      await loadState();
+    }
+
+    function toggleCollapse(id, data) {
+      const collapsed = { ...(data.collapsed || {}) };
+      collapsed[id] = !collapsed[id];
+      return collapsed;
+    }
+
+    function updateDerived(data) {
+      $('metaLine').textContent = `更新时间：${new Date().toLocaleString('zh-CN')} · 数据源：~/.openclaw/openclaw.json`;
+      $('healthTag').textContent = data.counts?.risk ? '存在风险项' : '系统健康';
+      $('agentCountTag').textContent = `${data.counts?.total ?? 0} 个 Agent`;
+      $('footerTime').textContent = data.updatedAt ? new Date(data.updatedAt).toLocaleString('zh-CN') : '-';
+      $('serviceOk').textContent = '已连接';
+      $('serviceOk').parentElement.className = 'pill';
+    }
+
+    function maybeOpenFromQuery() {
+      const id = new URLSearchParams(location.search).get('edit');
+      if (!id || !state.data?.agents?.some(a => a.id === id)) return;
+      openEdit(id);
+      history.replaceState({}, '', '/');
+    }
+
+    function render(data) {
+      updateDerived(data);
+      renderArchitecture(data);
+      $('kpiWrap').innerHTML = renderKpis(data);
+      $('alertsBody').innerHTML = renderAlerts(data);
+      $('agentsTableWrap').innerHTML = renderAgents(data);
+      $('skillsTableWrap').innerHTML = renderSkills(data);
+      $('topWeights').innerHTML = topWeights(data.agents || []);
+      $('docsWrap').innerHTML = renderDocs();
+      $('focusList').innerHTML = renderFocus();
+      $('suggestList').innerHTML = renderSuggestions();
+      $('summaryText').innerHTML = renderSummary(data);
+      attachRowHandlers();
+      maybeOpenFromQuery();
+    }
+
+    function attachRowHandlers() {
+      document.querySelectorAll('[data-edit]').forEach(btn => btn.onclick = () => openEdit(btn.dataset.edit));
+      document.querySelectorAll('[data-skills]').forEach(btn => btn.onclick = () => openEdit(btn.dataset.skills, true));
+    }
+
+    function openModal() { $('agentModal').classList.add('open'); }
+    function closeModal() { $('agentModal').classList.remove('open'); }
+    function openEditModal() { $('editModal').classList.add('open'); }
+    function closeEditModal() { $('editModal').classList.remove('open'); }
+
+    async function api(path, method='GET', body) {
+      const res = await fetch(`${path}${path.includes('?') ? '&' : '?'}v=${Date.now()}`, {
+        method,
+        headers: body ? {'Content-Type':'application/json'} : undefined,
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+      return json;
+    }
+
+    async function loadModels() {
+      const data = await api('/api/models');
+      state.models = data;
+      const current = data.current?.primary || '';
+      $('modelPrimarySel').innerHTML = (data.available || []).map(x => `<option value="${esc(x.label)}" ${x.label === current ? 'selected' : ''}>${esc(x.label)}${x.reasoning ? ' · reasoning' : ''}</option>`).join('');
+      $('modelInfo').textContent = `当前主模型：${current || '未设置'}${data.current?.fallbacks?.length ? `；回退：${data.current.fallbacks.join(', ')}` : ''}`;
+    }
+
+    async function loadState() {
+      $('serviceOk').textContent = '连接中…';
+      try {
+        const [data] = await Promise.all([api('/api/state'), loadModels()]);
+        state.data = data;
+        state.zoom = typeof data.zoom === 'number' ? data.zoom : 1;
+        state.zoomX = typeof data.zoomX === 'number' ? data.zoomX : 0;
+        state.zoomY = typeof data.zoomY === 'number' ? data.zoomY : 0;
+        render(data);
+      } catch (err) {
+        $('serviceOk').textContent = 'API 未连接';
+        $('serviceOk').parentElement.className = 'pill status-warn';
+        console.error(err);
+        alert(`加载失败：${err.message}`);
+      }
+    }
+
+    function scheduleAutoRefresh() {
+      if (state.timer) clearInterval(state.timer);
+      const ms = Number($('autoRefreshSel').value);
+      if (!ms) return;
+      state.timer = setInterval(() => {
+        if (!state.drag && !state.layoutSaving) loadState();
+      }, ms);
+    }
+
+    function openEdit(id, skillsOnly=false) {
+      const agent = (state.data?.agents || []).find(a => a.id === id);
+      if (!agent) return;
+      state.editing = agent;
+      $('editSubtitle').textContent = `${agent.id} · ${agent.workspace || ''}`;
+      $('editId').value = agent.id;
+      $('editName').value = agent.name || '';
+      $('editWorkspace').value = agent.workspace || '';
+      $('editStatus').value = agent.status || 'online';
+      $('editEmoji').value = agent.emoji || '';
+      $('editIdentityName').value = agent.name || '';
+      $('editSkills').value = (agent.skills || []).join('\n');
+      $('editTheme').value = agent.theme || '';
+      $('editAllowAgents').value = (agent.allowAgents || []).join('\n');
+      $('editTools').value = (agent.tools || []).join('\n');
+      $('editMsg').textContent = '';
+      openEditModal();
+      if (skillsOnly) {
+        $('editSkills').focus();
+      }
+    }
+
+    async function createAgent() {
+      $('newAgentMsg').textContent = '创建中…';
+      try {
+        const payload = {
+          id: $('newId').value.trim(),
+          name: $('newName').value.trim(),
+          workspace: $('newWorkspace').value.trim(),
+          emoji: $('newEmoji').value.trim(),
+          skills: $('newSkills').value,
+          theme: $('newTheme').value.trim(),
+          identityName: $('newName').value.trim(),
+          subagents: { allowAgents: $('newAllowAgents').value },
+          tools: { alsoAllow: $('newTools').value },
+        };
+        const data = await api('/api/agents', 'POST', payload);
+        $('newAgentMsg').textContent = `已创建，备份：${data.backup}`;
+        closeModal();
+        await loadState();
+      } catch (err) {
+        $('newAgentMsg').textContent = `失败：${err.message}`;
+      }
+    }
+
+    async function saveAgent(skillsOnly=false) {
+      if (!state.editing) return;
+      const id = state.editing.id;
+      const payload = skillsOnly ? { skills: $('editSkills').value } : {
+        name: $('editName').value.trim(),
+        workspace: $('editWorkspace').value.trim(),
+        status: $('editStatus').value,
+        emoji: $('editEmoji').value.trim(),
+        identityName: $('editIdentityName').value.trim(),
+        skills: $('editSkills').value,
+        theme: $('editTheme').value.trim(),
+        allowAgents: $('editAllowAgents').value,
+        tools: $('editTools').value,
+      };
+      $('editMsg').textContent = '保存中…';
+      try {
+        const data = await api(`/api/agents/${encodeURIComponent(id)}`, 'PUT', payload);
+        $('editMsg').textContent = `已保存，备份：${data.backup}`;
+        await loadState();
+      } catch (err) {
+        $('editMsg').textContent = `失败：${err.message}`;
+      }
+    }
+
+    async function deleteAgent() {
+      if (!state.editing) return;
+      const id = state.editing.id;
+      if (!confirm(`确认删除 agent ${id}？此操作会修改 openclaw.json。`)) return;
+      $('editMsg').textContent = '删除中…';
+      try {
+        const data = await api(`/api/agents/${encodeURIComponent(id)}`, 'DELETE');
+        $('editMsg').textContent = `已删除，备份：${data.backup}`;
+        closeEditModal();
+        await loadState();
+      } catch (err) {
+        $('editMsg').textContent = `失败：${err.message}`;
+      }
+    }
+
+    $('saveLayoutBtn').onclick = async () => {
+      try {
+        const payload = { layout: collectLayout(), edges: state.data?.edges, collapsed: state.data?.collapsed || {}, zoom: state.zoom, zoomX: state.zoomX, zoomY: state.zoomY };
+        await api('/api/layout', 'PUT', payload);
+        $('layoutInfo').textContent = '布局已保存。';
+        await loadState();
+      } catch (err) {
+        $('layoutInfo').textContent = `保存失败：${err.message}`;
+      }
+    };
+    $('resetLayoutBtn').onclick = async () => {
+      try {
+        await api('/api/layout', 'PUT', { layout: {}, edges: state.data?.edges, collapsed: {}, zoom: 1, zoomX: 0, zoomY: 0 });
+        $('layoutInfo').textContent = '已恢复默认布局。';
+        await loadState();
+      } catch (err) {
+        $('layoutInfo').textContent = `恢复失败：${err.message}`;
+      }
+    };
+    $('normalizeLayoutBtn').onclick = async () => {
+      try {
+        await api('/api/layout/normalize', 'POST');
+        state.zoom = 1; state.zoomX = 0; state.zoomY = 0; applyZoom();
+        $('layoutInfo').textContent = '布局已规范化。';
+        await loadState();
+      } catch (err) {
+        $('layoutInfo').textContent = `规范失败：${err.message}`;
+      }
+    };
+    $('autoLayoutBtn').onclick = async () => {
+      try {
+        const layout = autoLayout(state.data || {agents:[], edges:[]});
+        await api('/api/layout', 'PUT', { layout, edges: state.data?.edges, collapsed: state.data?.collapsed || {} });
+        $('layoutInfo').textContent = `已自动排布（${$('layoutDirBtn').dataset.dir || 'horizontal'}）。`;
+        await loadState();
+      } catch (err) {
+        $('layoutInfo').textContent = `自动排布失败：${err.message}`;
+      }
+    };
+    $('layoutDirBtn').dataset.dir = 'horizontal';
+    $('layoutDirBtn').onclick = () => {
+      $('layoutDirBtn').dataset.dir = $('layoutDirBtn').dataset.dir === 'horizontal' ? 'vertical' : 'horizontal';
+      $('layoutInfo').textContent = `自动排布方向：${$('layoutDirBtn').dataset.dir === 'horizontal' ? '横向' : '纵向'}`;
+    };
+    $('zoomInBtn').onclick = async () => { setZoom(state.zoom + 0.1); await saveLayoutSnapshot(state.data, '缩放已保存'); };
+    $('zoomOutBtn').onclick = async () => { setZoom(state.zoom - 0.1); await saveLayoutSnapshot(state.data, '缩放已保存'); };
+    $('zoomResetBtn').onclick = async () => { state.zoom = 1; state.zoomX = 0; state.zoomY = 0; state.autoFit = false; applyZoom(); if (state.data) drawEdges(state.data); await saveLayoutSnapshot(state.data, '缩放已重置'); };
+    $('fitBtn').onclick = async () => { applyCanvasBounds(state.data); if (state.data) drawEdges(state.data); $('layoutInfo').textContent = '边界已重算'; scheduleBoundsSave(); };
+    $('toggleConnectBtn').onclick = () => {
+      state.connectMode = !state.connectMode;
+      state.connectFrom = null;
+      state.connectPreview = null;
+      $('layoutInfo').textContent = state.connectMode ? '拖线模式：按住起点节点拖到目标节点，松开完成连线。' : '拖线模式已关闭。';
+      if (!state.connectMode && state.data) drawEdges(state.data);
+    };
+    $('btnRefresh').onclick = loadState;
+    $('btnOpenNew').onclick = openModal;
+    $('saveModelBtn').onclick = async () => {
+      try {
+        const primary = $('modelPrimarySel').value;
+        $('modelInfo').textContent = '保存模型并重启 gateway 中…';
+        const data = await api('/api/model', 'PUT', { primary, restart: true });
+        const restartText = data.restart?.ok ? 'gateway 已重启' : (data.restart?.error ? `gateway 重启失败：${data.restart.error}` : 'gateway 未重启');
+        $('modelInfo').textContent = `已保存：${primary}；${restartText}；备份：${data.backup}`;
+        await loadState();
+      } catch (err) {
+        $('modelInfo').textContent = `保存失败：${err.message}`;
+      }
+    };
+    $('btnExport').onclick = async () => {
+      const data = await api('/api/export');
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'agent-console-export.json';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+    };
+    $('closeModal').onclick = closeModal;
+    $('cancelCreate').onclick = closeModal;
+    $('createAgentBtn').onclick = createAgent;
+    $('closeEditModal').onclick = closeEditModal;
+    $('saveAgentBtn').onclick = () => saveAgent(false);
+    $('editSkillsBtn').onclick = () => saveAgent(true);
+    $('deleteAgentBtn').onclick = deleteAgent;
+    $('searchInput').oninput = (e) => { state.filter = e.target.value; if (state.data) render(state.data); };
+    $('autoRefreshSel').onchange = scheduleAutoRefresh;
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { closeModal(); closeEditModal(); }
+    });
+
+    loadState().then(scheduleAutoRefresh);
+  </script>
+</body>
+</html>
