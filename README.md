@@ -1,41 +1,18 @@
 # openclaw-agent-console-bilingual
 
-A sanitized, bilingual export of the OpenClaw agent console, architecture docs, and operating model.
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub last commit](https://img.shields.io/github/last-commit/jsk11231/openclaw-agent-console-bilingual)](https://github.com/jsk11231/openclaw-agent-console-bilingual/commits/main)
 [![Repo size](https://img.shields.io/github/repo-size/jsk11231/openclaw-agent-console-bilingual)](https://github.com/jsk11231/openclaw-agent-console-bilingual)
 
-中文说明见下方。
+A sanitized, bilingual export of the OpenClaw agent console and architecture docs.
 
-## Highlights
+## What it is
 
 - Local single-service console for agent architecture management
 - Live refresh, agent status, skill editing, export, audit, and model switching
 - Architecture graph with drag layout, zoom, auto-layout, and relation editing
-- Sanitized for public sharing: private paths, local-only roles, and sensitive references removed
+- Public-safe snapshot with private paths, local-only roles, and sensitive references removed
 - Bilingual docs: Chinese + English
-
-## Screenshots
-
-### Dashboard
-
-![Dashboard](docs/screenshots/dashboard.png)
-
-> Screenshot files will be added when running on a display-enabled Mac session.
-> If you want to add them later, place files at `docs/screenshots/dashboard.png` and `docs/screenshots/audit.png`.
-
-### Audit Page
-
-![Audit Page](docs/screenshots/audit.png)
-
-## What’s inside
-
-- `agent-console-server.js` — local HTTP server + API
-- `agent-console.html` — main console UI
-- `audit.html` — config audit page
-- `AGENTS.md`, `ARCHITECTURE.md`, `OPERATING_MODEL.md` — architecture and operating docs
-- `README.md`, `README_EN.md` — bilingual overview
 
 ## Quick Start
 
@@ -43,14 +20,27 @@ A sanitized, bilingual export of the OpenClaw agent console, architecture docs, 
 node agent-console-server.js
 ```
 
-Then open:
+Open:
 
 - `http://127.0.0.1:8787/`
 - `http://127.0.0.1:8787/audit`
 
+## Screenshots
+
+- Dashboard: `docs/screenshots/dashboard.png`
+- Audit page: `docs/screenshots/audit.png`
+
+## Included
+
+- `agent-console-server.js` — local HTTP server + API
+- `agent-console.html` — main console UI
+- `audit.html` — config audit page
+- `AGENTS.md`, `ARCHITECTURE.md`, `OPERATING_MODEL.md` — architecture and operating docs
+- `README_EN.md` — English overview
+
 ## Release notes
 
-See `RELEASES.md` for release history and packaging notes.
+See `RELEASES.md`.
 
 ## License
 
@@ -61,24 +51,6 @@ MIT License. See `LICENSE`.
 # 中文说明
 
 这是 OpenClaw 本地 agent 控制台与架构文档的**深度脱敏中英文双语导出版**。
-
-## 主要能力
-
-- 本地单服务控制台
-- Agent 状态查看与实时刷新
-- 新增 / 编辑 / 删除 Agent
-- 手动改 skill
-- 导出 JSON
-- 配置审计页
-- 默认 API 模型切换
-- 架构图拖拽、缩放、自动排布、关系编辑
-
-## 已做脱敏
-
-- 去除本地路径痕迹
-- 去除私有角色与内部入口节点
-- 去除明显敏感引用
-- 保留可公开的架构与运行说明
 
 ## 快速启动
 
